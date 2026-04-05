@@ -1,6 +1,10 @@
 from django.shortcuts import render
 from django.utils import timezone
 from .models import Post
+from django.shortcuts import redirect
+from django.contrib.auth import login
+from .forms import RegistrationForm
+
 
 def post_list(request):
     posts = Post.objects.filter(published_date__lte=timezone.now()).order_by('published_date')
@@ -21,3 +25,17 @@ def post_detail(request, post_id):
         'post': post,
         'related_posts': related_posts
     })
+
+def register(request):
+    if request.method == 'POST':
+        form = RegistrationForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.set_password(form.cleaned_data['password'])
+            user.save()
+            login(request, user)
+            return redirect('/')
+    else:
+        form = RegistrationForm()
+    
+    return render(request, 'flag_game/register.html', {'form': form})
