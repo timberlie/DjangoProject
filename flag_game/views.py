@@ -9,3 +9,15 @@ def post_list(request):
 def blog(request):
     posts = Post.objects.all().order_by('-published_date')  # последние сверху
     return render(request, 'flag_game/blog.html', {'posts': posts})
+
+def post_detail(request, post_id):
+    from django.shortcuts import get_object_or_404
+    
+    post = get_object_or_404(Post, id=post_id)
+    # Похожие посты (по категории или по тегам)
+    related_posts = Post.objects.exclude(id=post_id).order_by('?')[:3]
+    
+    return render(request, 'flag_game/post_detail.html', {
+        'post': post,
+        'related_posts': related_posts
+    })

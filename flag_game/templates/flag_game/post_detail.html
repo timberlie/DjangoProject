@@ -1,0 +1,68 @@
+{% extends "flag_game/base.html" %}
+
+{% block title %}{{ post.title }} - Веселье с флагами{% endblock %}
+
+{% block content %}
+<div class="post-detail">
+    <div class="post-detail-header">
+        <a href="/blog/" class="back-link">← Назад к блогу</a>
+        <h1>{{ post.title }}</h1>
+        <div class="post-detail-meta">
+            <span>📅 {{ post.published_date|date:"d.m.Y H:i" }}</span>
+            <span>🏷️ {{ post.category|default:"Флаги" }}</span>
+            {% if post.author %}
+            <span>✍️ Автор: {{ post.author }}</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="post-detail-content">
+        {% if post.flag_image %}
+        <div class="post-detail-flag">
+            <img src="{{ post.flag_image.url }}" alt="Флаг {{ post.country_name }}">
+        </div>
+        {% endif %}
+
+        <div class="post-detail-text">
+            {{ post.text|linebreaksbr }}
+        </div>
+    </div>
+
+    <div class="post-detail-footer">
+        <div class="post-tags">
+            <strong>Теги:</strong>
+            {% if post.tags %}
+                {% for tag in post.tags.split %}
+                <span class="tag">{{ tag }}</span>
+                {% endfor %}
+            {% else %}
+                <span class="tag">флаги</span>
+                <span class="tag">география</span>
+                <span class="tag">история</span>
+            {% endif %}
+        </div>
+
+        <div class="post-actions">
+            <a href="/game/" class="btn">🎮 Попробовать угадать флаги</a>
+            <a href="/blog/" class="btn-secondary">📖 Другие статьи</a>
+        </div>
+    </div>
+</div>
+
+<!-- Похожие посты -->
+{% if related_posts %}
+<div class="related-posts">
+    <h3>📌 Похожие статьи</h3>
+    <div class="related-list">
+        {% for related in related_posts %}
+        <div class="related-card">
+            <a href="/post/{{ related.id }}/">
+                <h4>{{ related.title }}</h4>
+                <p>{{ related.text|truncatewords:15 }}</p>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}
