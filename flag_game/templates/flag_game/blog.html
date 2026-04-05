@@ -1,0 +1,60 @@
+{% extends "flag_game/base.html" %}
+
+{% block title %}Блог о флагах - Веселье с флагами{% endblock %}
+
+{% block content %}
+<div class="blog-header">
+    <h2>📖 Блог о флагах мира</h2>
+    <p>Интересные факты, история и символика флагов разных стран</p>
+</div>
+
+<div class="posts-list">
+    {% for post in posts %}
+    <div class="post-card">
+        <div class="post-flag">
+            {% if post.flag_image %}
+            <img src="{{ post.flag_image.url }}" alt="Флаг {{ post.country_name }}">
+            {% else %}
+            <div class="flag-placeholder">🎌</div>
+            {% endif %}
+        </div>
+        <div class="post-content">
+            <h3><a href="/post/{{ post.id }}/">{{ post.title }}</a></h3>
+            <div class="post-meta">
+                <span>📅 {{ post.published_date|date:"d.m.Y" }}</span>
+                <span>🏷️ {{ post.category|default:"Флаги" }}</span>
+            </div>
+            <div class="post-description">
+                {{ post.text|linebreaksbr|truncatewords:40 }}
+            </div>
+            <a href="/post/{{ post.id }}/" class="read-more">Читать полностью →</a>
+        </div>
+    </div>
+    {% empty %}
+    <div class="empty-posts">
+        <p>📭 Пока нет статей в блоге. Скоро появятся!</p>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Пагинация (если постов много) -->
+{% if posts.has_other_pages %}
+<div class="pagination">
+    {% if posts.has_previous %}
+        <a href="?page={{ posts.previous_page_number }}" class="page-link">&laquo; Назад</a>
+    {% endif %}
+    
+    {% for num in posts.paginator.page_range %}
+        {% if posts.number == num %}
+            <span class="page-current">{{ num }}</span>
+        {% else %}
+            <a href="?page={{ num }}" class="page-link">{{ num }}</a>
+        {% endif %}
+    {% endfor %}
+    
+    {% if posts.has_next %}
+        <a href="?page={{ posts.next_page_number }}" class="page-link">Вперед &raquo;</a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

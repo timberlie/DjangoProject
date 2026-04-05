@@ -1,0 +1,36 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{% block title %}Веселье с флагами{% endblock %}</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="{% static 'css/flag_game.css' %}">
+        {% block extra_css %}{% endblock %}
+    </head>
+    <body>
+        <header>
+            <h1>🎌 Веселье с флагами 🎌</h1>
+            <p>Изучай флаги мира в игровой форме!</p>
+        </header>
+
+        <nav>
+            <a href="/">Главная</a>
+            <a href="/game/">Угадай флаги</a>
+            <a href="/blog/">Блог о флагах</a>
+            <a href="/register/">Регистрация</a>
+        </nav>
+
+        <div class="container">
+            {% block content %}
+            <!-- Контент страницы -->
+            {% endblock %}
+        </div>
+
+        <footer>
+            <p>© 2024 Веселье с флагами | Изучай мир с нами</p>
+        </footer>
+
+        {% block extra_js %}{% endblock %}
+    </body>
+</html>
