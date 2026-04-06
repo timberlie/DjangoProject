@@ -1,0 +1,274 @@
+{% extends "flag_game/base.html" %}
+
+{% block title %}Угадай флаги - Веселье с флагами{% endblock %}
+
+{% block extra_css %}
+<style>
+    .game-container {
+        max-width: 900px;
+        margin: 0 auto;
+        text-align: center;
+    }
+    
+    .game-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+    
+    .score {
+        background: #2c3e50;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 25px;
+        font-size: 1.2em;
+    }
+    
+    .question {
+        background: white;
+        padding: 25px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        font-size: 1.5em;
+        color: #2c3e50;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    }
+    
+    .flags-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 25px;
+        margin-bottom: 30px;
+    }
+    
+    .flag-card {
+        background: white;
+        padding: 20px;
+        border-radius: 15px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    }
+    
+    .flag-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+    
+    .flag-card img {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 10px;
+        border: 2px solid #e0e0e0;
+    }
+    
+    .flag-card.disabled {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+    
+    .message {
+        padding: 15px;
+        border-radius: 10px;
+        margin: 20px 0;
+        font-size: 1.2em;
+        font-weight: bold;
+        animation: fadeIn 0.3s ease;
+    }
+    
+    .message.correct {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+    
+    .message.incorrect {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+    
+    .next-btn {
+        background: #1abc9c;
+        color: white;
+        padding: 12px 30px;
+        border: none;
+        border-radius: 25px;
+        font-size: 1.1em;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .next-btn:hover {
+        background: #16a085;
+        transform: scale(1.05);
+    }
+    
+    .exit-btn {
+        background: #e74c3c;
+        color: white;
+        padding: 10px 25px;
+        text-decoration: none;
+        border-radius: 25px;
+        transition: all 0.3s ease;
+        display: inline-block;
+    }
+    
+    .exit-btn:hover {
+        background: #c0392b;
+        transform: scale(1.05);
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @media (max-width: 768px) {
+        .flags-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .question {
+            font-size: 1.2em;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="game-container">
+    <div class="game-header">
+        <div class="score">🏆 Счёт: <span id="score">0</span></div>
+        <a href="/" class="exit-btn">🚪 Выйти</a>
+    </div>
+    
+    <div class="question" id="question">
+        Загрузка...
+    </div>
+    
+    <div class="flags-grid" id="flagsGrid">
+        <!-- Флаги будут загружены через JavaScript -->
+    </div>
+    
+    <div id="message"></div>
+    
+    <button class="next-btn" id="nextBtn" style="display: none;">Следующий вопрос →</button>
+</div>
+
+<script>
+    let currentQuestion = null;
+    let score = 0;
+    let canAnswer = true;
+    
+    // Получаем CSRF-токен из куки
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    const csrftoken = getCookie('csrftoken');
+    
+    async function loadQuestion() {
+        try {
+            const response = await fetch('/api/get_question/');
+            currentQuestion = await response.json();
+            
+            document.getElementById('question').textContent = currentQuestion.question;
+            
+            const grid = document.getElementById('flagsGrid');
+            grid.innerHTML = '';
+            
+            currentQuestion.options.forEach(option => {
+                const card = document.createElement('div');
+                card.className = 'flag-card';
+                card.dataset.id = option.id;
+                card.onclick = () => checkAnswer(option.id);
+                
+                const img = document.createElement('img');
+                img.src = option.image_url;
+                img.alt = 'Флаг';
+                img.onerror = () => {
+                    img.src = 'https://via.placeholder.com/200x150?text=Флаг';
+                };
+                
+                card.appendChild(img);
+                grid.appendChild(card);
+            });
+            
+            document.getElementById('message').innerHTML = '';
+            document.getElementById('nextBtn').style.display = 'none';
+            canAnswer = true;
+            
+        } catch (error) {
+            console.error('Ошибка загрузки вопроса:', error);
+        }
+    }
+    
+    async function checkAnswer(selectedId) {
+        if (!canAnswer) return;
+        canAnswer = false;
+        
+        try {
+            const response = await fetch('/api/check_answer/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken  // Добавляем CSRF-токен
+                },
+                body: JSON.stringify({
+                    selected_id: selectedId,
+                    correct_id: currentQuestion.correct_id
+                })
+            });
+            
+            const result = await response.json();
+            
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = `<div class="message ${result.correct ? 'correct' : 'incorrect'}">${result.message}</div>`;
+            
+            if (result.correct) {
+                score++;
+                document.getElementById('score').textContent = score;
+            }
+            
+            // Отключаем клики по флагам
+            document.querySelectorAll('.flag-card').forEach(card => {
+                card.style.pointerEvents = 'none';
+                if (parseInt(card.dataset.id) === currentQuestion.correct_id) {
+                    card.style.border = '3px solid #1abc9c';
+                } else if (parseInt(card.dataset.id) === selectedId && !result.correct) {
+                    card.style.border = '3px solid #e74c3c';
+                }
+            });
+            
+            document.getElementById('nextBtn').style.display = 'block';
+            
+        } catch (error) {
+            console.error('Ошибка проверки ответа:', error);
+            canAnswer = true;
+        }
+    }
+    
+    document.getElementById('nextBtn').onclick = () => {
+        loadQuestion();
+    };
+    
+    // Загружаем первый вопрос
+    loadQuestion();
+</script>
+{% endblock %}

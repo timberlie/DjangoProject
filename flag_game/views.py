@@ -8,6 +8,9 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from .forms import RegistrationForm, LoginForm
+from django.http import JsonResponse
+import random
+from .flags_data import FLAGS_DATABASE, get_random_flags, get_country_by_id
 
 
 def post_list(request):
@@ -82,3 +85,48 @@ def user_login(request):
 def user_logout(request):
     logout(request)
     return redirect('/')
+
+def game(request):
+    return render(request, 'flag_game/game.html')
+
+def get_question(request):
+    """API для получения вопроса"""
+    # Выбираем правильный флаг
+    correct_id = random.choice(list(FLAGS_DATABASE.keys()))
+    correct_country = get_country_by_id(correct_id)
+    
+    # Выбираем 2 других случайных флага (неправильных)
+    other_ids = get_random_flags(exclude_id=correct_id)
+    
+    # Собираем 3 варианта (правильный + 2 неправильных)
+    option_ids = [correct_id] + other_ids
+    random.shuffle(option_ids)  # Перемешиваем порядок
+    
+    # Формируем ответ
+    options = []
+    for flag_id in option_ids:
+        options.append({
+            'id': flag_id,
+            'image_url': f'/static/flags/{FLAGS_DATABASE[flag_id]["file"]}'
+        })
+    
+    return JsonResponse({
+        'question': f'Какой флаг принадлежит стране "{correct_country}"?',
+        'correct_id': correct_id,
+        'options': options
+    })
+
+def check_answer(request):
+    """API для проверки ответа"""
+    import json
+    data = json.loads(request.body)
+    selected_id = data.get('selected_id')
+    correct_id = data.get('correct_id')
+    
+    is_correct = (selected_id == correct_id)
+    correct_country = get_country_by_id(correct_id)
+    
+    return JsonResponse({
+        'correct': is_correct,
+        'message': 'Верно! 🎉' if is_correct else f'Неверно! 😢 Правильный флаг - {correct_country}'
+    })
