@@ -1,5 +1,5 @@
-```markdown
-# 🎌 Веселье с флагами
+
+## 🎌 Веселье с флагами
 
 Веб-приложение для изучения флагов мира в игровой форме.
 
@@ -18,7 +18,7 @@ Timbelie
 
 ## Установка и запуск
 
-```bash
+
 git clone https://github.com/timberlie/DjangoProject.git
 cd DjangoProject
 python -m venv myvenv
@@ -27,13 +27,13 @@ pip install django
 python manage.py migrate
 python manage.py createsuperuser
 python manage.py runserver
-```
+
 
 Открыть в браузере: http://127.0.0.1:8000/
 
 ## Структура проекта
 
-```
+
 DjangoProject/
 ├── flag_game/
 │   ├── templates/flag_game/
@@ -46,7 +46,7 @@ DjangoProject/
 │   └── flags_data.py
 ├── mysite/
 └── manage.py
-```
+
 
 ## Функциональность
 
@@ -57,9 +57,9 @@ DjangoProject/
 
 ## Проверка качества кода
 
-```bash
+
 pylint flag_game/
-```
+
 
 Результат: 8.5/10
 
@@ -74,4 +74,3 @@ pylint flag_game/
 ## Контакты
 
 GitHub: [timberlie](https://github.com/timberlie)
-```
