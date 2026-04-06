@@ -33,7 +33,7 @@ python manage.py runserver
 
 ## Структура проекта
 
-
+'''
 DjangoProject/
 ├── flag_game/
 │   ├── templates/flag_game/
@@ -46,7 +46,7 @@ DjangoProject/
 │   └── flags_data.py
 ├── mysite/
 └── manage.py
-
+'''
 
 ## Функциональность
 
