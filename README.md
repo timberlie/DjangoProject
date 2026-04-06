@@ -31,23 +31,6 @@ python manage.py runserver
 
 Открыть в браузере: http://127.0.0.1:8000/
 
-## Структура проекта
-
-'''
-DjangoProject/
-├── flag_game/
-│   ├── templates/flag_game/
-│   ├── static/css/
-│   ├── static/flags/
-│   ├── models.py
-│   ├── views.py
-│   ├── forms.py
-│   ├── urls.py
-│   └── flags_data.py
-├── mysite/
-└── manage.py
-'''
-
 ## Функциональность
 
 - **Главная страница** — карточки с описанием игры и блога, последние посты
