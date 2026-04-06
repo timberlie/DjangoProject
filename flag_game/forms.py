@@ -1,9 +1,13 @@
+"""Формы для регистрации и авторизации пользователей."""
+
 from django import forms
 from django.contrib.auth.models import User
-from django.core.validators import RegexValidator
 from django.contrib.auth.forms import AuthenticationForm
-    
+
+
 class RegistrationForm(forms.ModelForm):
+    """Форма регистрации нового пользователя."""
+
     username = forms.CharField(
         label='Имя пользователя',
         max_length=150,
@@ -13,7 +17,7 @@ class RegistrationForm(forms.ModelForm):
         }),
         help_text='Только буквы, цифры и @/./+/-/_.'
     )
-    
+
     email = forms.EmailField(
         label='Email',
         widget=forms.EmailInput(attrs={
@@ -21,7 +25,7 @@ class RegistrationForm(forms.ModelForm):
             'placeholder': 'example@mail.com'
         })
     )
-    
+
     password = forms.CharField(
         label='Пароль',
         widget=forms.PasswordInput(attrs={
@@ -29,7 +33,7 @@ class RegistrationForm(forms.ModelForm):
             'placeholder': 'Минимум 8 символов'
         })
     )
-    
+
     password_confirm = forms.CharField(
         label='Подтверждение пароля',
         widget=forms.PasswordInput(attrs={
@@ -37,46 +41,67 @@ class RegistrationForm(forms.ModelForm):
             'placeholder': 'Введите пароль ещё раз'
         })
     )
-    
+
     class Meta:
+        """Мета-класс для формы регистрации."""
+
         model = User
         fields = ['username', 'email']
-    
+
     def clean_username(self):
+        """Проверяет уникальность и длину имени пользователя."""
         username = self.cleaned_data.get('username')
         if User.objects.filter(username=username).exists():
-            raise forms.ValidationError('Пользователь с таким именем уже существует')
+            raise forms.ValidationError(
+                'Пользователь с таким именем уже существует'
+            )
         if len(username) < 3:
-            raise forms.ValidationError('Имя пользователя должно содержать минимум 3 символа')
+            raise forms.ValidationError(
+                'Имя пользователя должно содержать минимум 3 символа'
+            )
         return username
-    
+
     def clean_email(self):
+        """Проверяет уникальность email."""
         email = self.cleaned_data.get('email')
         if User.objects.filter(email=email).exists():
-            raise forms.ValidationError('Пользователь с таким email уже зарегистрирован')
+            raise forms.ValidationError(
+                'Пользователь с таким email уже зарегистрирован'
+            )
         return email
-    
+
     def clean_password(self):
+        """Проверяет сложность пароля."""
         password = self.cleaned_data.get('password')
         if len(password) < 8:
-            raise forms.ValidationError('Пароль должен содержать минимум 8 символов')
+            raise forms.ValidationError(
+                'Пароль должен содержать минимум 8 символов'
+            )
         if not any(char.isdigit() for char in password):
-            raise forms.ValidationError('Пароль должен содержать хотя бы одну цифру')
+            raise forms.ValidationError(
+                'Пароль должен содержать хотя бы одну цифру'
+            )
         if not any(char.isupper() for char in password):
-            raise forms.ValidationError('Пароль должен содержать хотя бы одну заглавную букву')
+            raise forms.ValidationError(
+                'Пароль должен содержать хотя бы одну заглавную букву'
+            )
         return password
-    
+
     def clean(self):
+        """Проверяет совпадение паролей."""
         cleaned_data = super().clean()
         password = cleaned_data.get('password')
         password_confirm = cleaned_data.get('password_confirm')
-        
+
         if password and password_confirm and password != password_confirm:
             raise forms.ValidationError('Пароли не совпадают')
-        
+
         return cleaned_data
 
+
 class LoginForm(AuthenticationForm):
+    """Форма авторизации пользователя."""
+
     username = forms.CharField(
         label='Имя пользователя',
         widget=forms.TextInput(attrs={
@@ -84,7 +109,7 @@ class LoginForm(AuthenticationForm):
             'placeholder': 'Введите имя пользователя'
         })
     )
-    
+
     password = forms.CharField(
         label='Пароль',
         widget=forms.PasswordInput(attrs={
@@ -92,7 +117,7 @@ class LoginForm(AuthenticationForm):
             'placeholder': 'Введите пароль'
         })
     )
-    
+
     error_messages = {
         'invalid_login': 'Неверное имя пользователя или пароль',
         'inactive': 'Аккаунт деактивирован',

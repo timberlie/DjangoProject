@@ -1,6 +1,7 @@
+"""URL-маршруты для приложения flag_game."""
+
 from django.urls import path
 from . import views
-
 
 
 urlpatterns = [
