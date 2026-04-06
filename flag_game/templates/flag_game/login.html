@@ -1,0 +1,55 @@
+{% extends "flag_game/base.html" %}
+
+{% block title %}Вход - Веселье с флагами{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <h2>🔐 Вход в аккаунт</h2>
+        <p>Войдите, чтобы продолжить игру и сохранять прогресс</p>
+        
+        <form method="post" class="auth-form">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.username.id_for_label }}">Имя пользователя</label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                    <div class="error-message">
+                        {% for error in form.username.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.password.id_for_label }}">Пароль</label>
+                {{ form.password }}
+                {% if form.password.errors %}
+                    <div class="error-message">
+                        {% for error in form.password.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            {% if form.non_field_errors %}
+                <div class="error-message non-field-error">
+                    {% for error in form.non_field_errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            <button type="submit" class="btn btn-auth">Войти</button>
+        </form>
+        
+        <div class="auth-footer">
+            <p>Нет аккаунта? <a href="/register/">Зарегистрироваться</a></p>
+            <p><a href="/password-reset/" class="forgot-link">Забыли пароль?</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

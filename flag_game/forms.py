@@ -1,7 +1,8 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.core.validators import RegexValidator
-
+from django.contrib.auth.forms import AuthenticationForm
+    
 class RegistrationForm(forms.ModelForm):
     username = forms.CharField(
         label='Имя пользователя',
@@ -74,3 +75,25 @@ class RegistrationForm(forms.ModelForm):
             raise forms.ValidationError('Пароли не совпадают')
         
         return cleaned_data
+
+class LoginForm(AuthenticationForm):
+    username = forms.CharField(
+        label='Имя пользователя',
+        widget=forms.TextInput(attrs={
+            'class': 'form-input',
+            'placeholder': 'Введите имя пользователя'
+        })
+    )
+    
+    password = forms.CharField(
+        label='Пароль',
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-input',
+            'placeholder': 'Введите пароль'
+        })
+    )
+    
+    error_messages = {
+        'invalid_login': 'Неверное имя пользователя или пароль',
+        'inactive': 'Аккаунт деактивирован',
+    }
